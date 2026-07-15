@@ -19,15 +19,12 @@ re-exports that same function.
 
 ### Behavior
 
-`compute(x)` evaluates `6 * x` in IEEE-754 double precision and adds `10` when that
-result is even. The input is first normalized to a Python `float` (binary64), so the
-function reproduces the original JavaScript `Number` semantics exactly and always
-returns a `float`:
+`compute(x)` evaluates `6 * x` and adds `10` when that result is even. The parity
+conditional is retained (rather than hard-coded to `6 * x + 10`) so the behavior
+matches the original helpers for every numeric input:
 
-- For an integer `x`, `6 * x` is even, so the `+ 10` is applied (for example,
-  `compute(3) == 28.0`). Very large magnitudes follow binary64 rounding, matching the
-  original: values beyond `2 ** 53` are rounded to the nearest double before and after
-  the `+ 10`.
+- For an integer `x`, `6 * x` is always even, so the `+ 10` is applied (for example,
+  `compute(3) == 28`).
 - For a non-integer `x` the result may be odd, in which case the `+ 10` is skipped
   (for example, `compute(0.5) == 3.0`).
 
@@ -75,9 +72,9 @@ Import `compute` from the top-level package and call it with a number:
 ```python
 from society_mgmt import compute
 
-compute(0)  # -> 10.0
-compute(3)  # -> 28.0
-compute(5)  # -> 40.0
+compute(0)  # -> 10
+compute(3)  # -> 28
+compute(5)  # -> 40
 ```
 
 The same function is re-exported from every layer subpackage, so you can import it from
@@ -87,7 +84,7 @@ callable defined in `society_mgmt.core`:
 ```python
 from society_mgmt.services import compute
 
-compute(5)  # -> 40.0
+compute(5)  # -> 40
 ```
 
 Non-integer inputs follow the parity rule described in
@@ -162,8 +159,8 @@ ruff check .
 # Format check
 ruff format --check .
 
-# Static type check
-mypy src
+# Static type check (covers both the package and the test suite)
+mypy src tests
 ```
 
 ## License

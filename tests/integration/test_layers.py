@@ -16,11 +16,28 @@ object identity (not mere equality): for every layer,
 from __future__ import annotations
 
 import importlib
-from types import ModuleType
+from collections.abc import Callable
+from typing import Protocol, cast
 
 import pytest
 
 from society_mgmt import core
+
+
+class _LayerModule(Protocol):
+    """Static contract for a ``society_mgmt`` layer subpackage namespace.
+
+    Each layer subpackage re-exports the single canonical function and declares
+    it as its public surface. Typing the imported module against this
+    :class:`~typing.Protocol` (instead of a bare :class:`types.ModuleType`,
+    whose attributes are ``Any``) makes ``module.compute`` and ``module.__all__``
+    statically typed, so the assertions below are checked rather than silently
+    typed as ``Any``.
+    """
+
+    __all__: list[str]
+    compute: Callable[[float], float]
+
 
 # The nine layer subpackages that must each re-export ``core.compute``.
 LAYERS: list[str] = [
@@ -40,9 +57,14 @@ LAYERS: list[str] = [
 SAMPLE_INPUTS: list[float] = [0, 3, 5, -1, 0.5]
 
 
-def _import_layer(layer: str) -> ModuleType:
-    """Import and return the ``society_mgmt.<layer>`` subpackage."""
-    return importlib.import_module(f"society_mgmt.{layer}")
+def _import_layer(layer: str) -> _LayerModule:
+    """Import and return the ``society_mgmt.<layer>`` subpackage, typed.
+
+    The dynamically imported module is cast to :class:`_LayerModule` so its
+    ``compute`` and ``__all__`` attributes carry concrete static types rather
+    than ``Any``.
+    """
+    return cast(_LayerModule, importlib.import_module(f"society_mgmt.{layer}"))
 
 
 @pytest.mark.parametrize("layer", LAYERS)
@@ -56,7 +78,7 @@ def test_layer_reexports_core_compute_identity(layer: str) -> None:
 def test_layer_exposes_compute_in_all(layer: str) -> None:
     """Each layer declares ``compute`` as its public surface via ``__all__``."""
     module = _import_layer(layer)
-    assert getattr(module, "__all__", None) == ["compute"]
+    assert module.__all__ == ["compute"]
 
 
 @pytest.mark.parametrize("layer", LAYERS)
