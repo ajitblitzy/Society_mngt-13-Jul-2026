@@ -1,0 +1,73 @@
+"""Integration tests for the cross-layer re-export contract of :mod:`society_mgmt`.
+
+These tests replace the former JavaScript integration fixtures
+(``society_mgmt_300k/tests/integration/file_10.js`` and ``file_21.js`` --
+together 2,400 helper functions, ``mod_10_*`` and ``mod_21_*``, with zero
+assertions) with a genuine, executable ``pytest`` suite.
+
+The migrated package exposes a single source of truth,
+:func:`society_mgmt.core.compute`, and each of the nine layer subpackages
+re-exports that exact function object via ``from society_mgmt.core import
+compute``. This suite asserts that Facade/re-export contract at the level of
+object identity (not mere equality): for every layer,
+``layer.compute is core.compute``.
+"""
+
+from __future__ import annotations
+
+import importlib
+from types import ModuleType
+
+import pytest
+
+from society_mgmt import core
+
+# The nine layer subpackages that must each re-export ``core.compute``.
+LAYERS: list[str] = [
+    "config",
+    "controllers",
+    "domain",
+    "middleware",
+    "models",
+    "repositories",
+    "routes",
+    "services",
+    "utils",
+]
+
+# Sample inputs exercising both parity branches of ``compute``: integer inputs
+# (result even -> +10) and a non-integer (result odd -> +10 skipped).
+SAMPLE_INPUTS: list[float] = [0, 3, 5, -1, 0.5]
+
+
+def _import_layer(layer: str) -> ModuleType:
+    """Import and return the ``society_mgmt.<layer>`` subpackage."""
+    return importlib.import_module(f"society_mgmt.{layer}")
+
+
+@pytest.mark.parametrize("layer", LAYERS)
+def test_layer_reexports_core_compute_identity(layer: str) -> None:
+    """Each layer's ``compute`` IS the exact same object as ``core.compute``."""
+    module = _import_layer(layer)
+    assert module.compute is core.compute
+
+
+@pytest.mark.parametrize("layer", LAYERS)
+def test_layer_exposes_compute_in_all(layer: str) -> None:
+    """Each layer declares ``compute`` as its public surface via ``__all__``."""
+    module = _import_layer(layer)
+    assert getattr(module, "__all__", None) == ["compute"]
+
+
+@pytest.mark.parametrize("layer", LAYERS)
+@pytest.mark.parametrize("x", SAMPLE_INPUTS)
+def test_layer_compute_matches_core(layer: str, x: float) -> None:
+    """Each layer's ``compute`` yields identical results to ``core.compute``."""
+    module = _import_layer(layer)
+    assert module.compute(x) == core.compute(x)
+
+
+def test_all_nine_layers_present() -> None:
+    """Exactly the nine documented layers are covered by this suite."""
+    assert LAYERS == sorted(LAYERS)
+    assert len(LAYERS) == 9
