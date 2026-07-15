@@ -199,3 +199,18 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+----------------------------------------------------------------------
+License Reconciliation Note
+----------------------------------------------------------------------
+This project is licensed under the Apache License, Version 2.0 (the full text
+above), which is the authoritative license. During the JavaScript-to-Python
+migration, a conflicting secondary license was found: a nested, incomplete
+license stub at the former path society_mgmt_300k/LICENSE/LICENSE.txt, labeled
+"MIT License" with "Copyright (c) 2026" and a truncated "Permission is hereby
+granted..." sentence. That stub belonged to the legacy society_mgmt_300k/
+corpus, which has been removed and superseded by the migrated Python package,
+so it no longer exists in the tree. This historical inconsistency is flagged
+for maintainer resolution; the migration has not unilaterally relicensed the
+project, and Apache-2.0 governs unless a maintainer explicitly decides otherwise.
+----------------------------------------------------------------------
