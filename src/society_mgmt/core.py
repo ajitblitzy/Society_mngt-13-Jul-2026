@@ -64,6 +64,7 @@ def compute(x: float) -> float:
         40.0
         >>> compute(0.5)
         3.0
+
     """
     r = 6 * float(x)
     return r + 10 if r % 2 == 0 else r
