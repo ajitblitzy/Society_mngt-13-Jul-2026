@@ -19,7 +19,7 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=9.1", "ruff", "mypy"]
+dev = ["pytest==9.1.1", "ruff==0.15.21", "mypy==2.3.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
