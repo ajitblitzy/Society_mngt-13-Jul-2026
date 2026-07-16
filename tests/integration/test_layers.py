@@ -16,11 +16,13 @@ object identity (not mere equality): for every layer,
 from __future__ import annotations
 
 import importlib
+import pkgutil
 from collections.abc import Callable
 from typing import Protocol, cast
 
 import pytest
 
+import society_mgmt
 from society_mgmt import core
 
 
@@ -89,7 +91,20 @@ def test_layer_compute_matches_core(layer: str, x: float) -> None:
     assert module.compute(x) == core.compute(x)
 
 
-def test_all_nine_layers_present() -> None:
-    """Exactly the nine documented layers are covered by this suite."""
-    assert LAYERS == sorted(LAYERS)
-    assert len(LAYERS) == 9
+def test_installed_layers_match_documented_exactly() -> None:
+    """Enumerate the installed package and assert exactly the nine documented layers.
+
+    Unlike a check of the hard-coded :data:`LAYERS` constant alone -- which
+    would pass regardless of the package's real contents -- this introspects
+    the *installed* ``society_mgmt`` package via :func:`pkgutil.iter_modules`
+    and asserts the discovered subpackages equal exactly the nine documented
+    layers. It therefore guards the single-source-of-truth topology (the AAP
+    mandates exactly nine layer subpackages, with no extras): it fails if a
+    tenth subpackage is added -- even one that violates the ``compute``
+    re-export contract -- or if a documented layer is removed.
+    """
+    discovered = sorted(
+        info.name for info in pkgutil.iter_modules(society_mgmt.__path__) if info.ispkg
+    )
+    assert discovered == sorted(LAYERS)
+    assert len(discovered) == 9
