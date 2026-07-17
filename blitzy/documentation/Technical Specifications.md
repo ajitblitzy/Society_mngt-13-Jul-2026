@@ -1,10 +1,17 @@
 # Technical Specification
 
+> **⚠ HISTORICAL PRE-REFACTOR SNAPSHOT — this document describes the *original* repository, not the current one.**
+>
+> This Technical Specification is a point-in-time record of the **pre-migration** `Society_mngt-13-Jul-2026` repository — the 300,000-line JavaScript corpus under `society_mgmt_300k/` (original corpus at commit `4263fe3`) — captured **before** the JavaScript → Python migration. It describes the legacy source that motivated the refactor; it does **not** describe the current repository.
+>
+> **Current state:** the migration is complete. At HEAD `13e7dd0` the tree is the consolidated, installable Python package `society_mgmt` (`src/` layout, one canonical `core.compute`, nine layer facades that re-export it, real `pytest` suites, and `pyproject.toml`); `society_mgmt_300k/` and all `.js` files have been removed. For the current repository state, see `README.md` and `blitzy/documentation/Project Guide.md`.
+
+
 # 1. Introduction
 
 ## 1.1 Executive Summary
 
-This Technical Specification documents the `Society_mngt-13-Jul-2026` repository exactly as it exists in source control. The repository consists of a top-level project marker (`README.md`, `LICENSE`) and a single nested code corpus, `society_mgmt_300k/`, whose name signals a "society management" theme and a scale target of roughly 300,000 lines. That scale target is met precisely: the corpus contains **exactly 300,000 lines** of JavaScript distributed across 29 `.js` files, organized beneath conventional application-layer directory names (`controllers/`, `services/`, `repositories/`, `routes/`, `models/`, `domain/`, `middleware/`, `config/`, `utils/`) with a parallel `tests/` tree (`unit/`, `integration/`).
+This Technical Specification documents the *original*, pre-migration `Society_mngt-13-Jul-2026` repository as it existed in source control **before** the JavaScript → Python migration (see the historical-snapshot note at the top of this document); the current repository is the migrated Python `society_mgmt` package described in that note. As captured in that pre-migration snapshot, the repository consisted of a top-level project marker (`README.md`, `LICENSE`) and a single nested code corpus, `society_mgmt_300k/`, whose name signals a "society management" theme and a scale target of roughly 300,000 lines. That scale target is met precisely: the corpus contains **exactly 300,000 lines** of JavaScript distributed across 29 `.js` files, organized beneath conventional application-layer directory names (`controllers/`, `services/`, `repositories/`, `routes/`, `models/`, `domain/`, `middleware/`, `config/`, `utils/`) with a parallel `tests/` tree (`unit/`, `integration/`).
 
 **Project overview.** Despite the application-oriented directory taxonomy, the *observed* implementation is a **generated, dependency-free code corpus** rather than a functioning society-management application. Every executable module in `society_mgmt_300k/src/` and `society_mgmt_300k/tests/` follows one uniform template: a `// mod_<N> - society module` label comment, an unused module-scoped `const store = [];`, and a large batch of standalone synchronous arithmetic helper functions. The 28 executable modules collectively define **33,105** such helpers (28,305 under `src/`, 4,800 under `tests/`), and every helper body is byte-identical — each accepts a numeric `x`, accumulates `x*1 + x*2 + x*3` (equivalent to `6*x`), adds `10` when the intermediate result is even, and returns it:
 
