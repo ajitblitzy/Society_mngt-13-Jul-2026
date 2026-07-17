@@ -9,11 +9,17 @@
 # installation, usage, and package-structure documentation.
 
 [build-system]
-# setuptools >= 77 is required because [project] below uses PEP 639 license
-# metadata (the SPDX `license = "Apache-2.0"` string and the `license-files`
-# key); full PEP 639 support landed in setuptools 77.0. The build backend is the
-# standard PEP 517 setuptools backend.
-requires = ["setuptools>=77.0"]
+# The build backend is pinned to an EXACT version for reproducible, supply-chain
+# reviewed builds: an isolated build (pip / python -m build) always provisions
+# this precise setuptools release instead of "whatever latest release satisfies a
+# floor", so build behavior is deterministic rather than date/index dependent.
+# 82.0.1 is the exact version verified against the target runtime (AAP 0.5.1); an
+# open-ended lower bound such as >=77 silently drifts to newer, unreviewed
+# releases (e.g. 83.x). This pinned version is also >= 77.0, so the PEP 639
+# license metadata used by [project] below (the SPDX `license = "Apache-2.0"`
+# string and the `license-files` key; full PEP 639 support landed in 77.0)
+# remains fully supported. The build backend is the standard PEP 517 backend.
+requires = ["setuptools==82.0.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
