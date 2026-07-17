@@ -17,23 +17,16 @@ import pytest
 
 # Canonical (input, expected) cases for society_mgmt.core.compute.
 # Integer x -> 6*x + 10 (result even); non-integer 0.5 -> 3.0 (result odd, +10 skipped).
-# Stored as an immutable tuple of tuples so the canonical table cannot be mutated
-# in place by any consumer, preventing cross-test state corruption.
-COMPUTE_CASES: tuple[tuple[float, float], ...] = (
+COMPUTE_CASES: list[tuple[float, float]] = [
     (0, 10),
     (3, 28),
     (5, 40),
     (-1, 4),
     (0.5, 3.0),
-)
+]
 
 
 @pytest.fixture
 def compute_cases() -> list[tuple[float, float]]:
-    """Return a fresh copy of the canonical ``(input, expected)`` cases.
-
-    A new ``list`` is built on every call, so a test that mutates the returned
-    value cannot corrupt the shared :data:`COMPUTE_CASES` table or leak state
-    into any other test. This keeps the fixture free of cross-test coupling.
-    """
-    return list(COMPUTE_CASES)
+    """Return the canonical ``(input, expected)`` cases for ``compute``."""
+    return COMPUTE_CASES

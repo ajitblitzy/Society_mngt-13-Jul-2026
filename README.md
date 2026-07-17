@@ -1,171 +1,166 @@
 # Society_mngt-13-Jul-2026
 
-A small, pure-computation Python library that exposes a single canonical function,
-`compute(x)`.
+A small, pure-computation Python library exposing a single canonical function,
+`compute(x)`. The package is the result of a JavaScript-to-Python refactor: a
+300,000-line JavaScript corpus containing roughly 33,105 byte-identical helper
+functions was consolidated into one typed, documented function, eliminating the
+massive duplication and dead code that dominated the original source. The
+library performs arithmetic only — it implements no society-management domain
+behavior; the project name and the layer names are retained from the historical
+source corpus purely for traceability.
 
 ## Overview
 
-`society_mgmt` is the result of a JavaScript-to-Python refactor. The original corpus
-was a ~300,000-line JavaScript project made up of roughly 33,105 byte-identical helper
-functions with no module system, no packaging, and no real tests. The migration
-collapsed all of that duplication into a single, well-typed, documented implementation
-and packaged it as an installable Python library.
-
-The library performs arithmetic only. There is no persistence, networking, I/O, or
+The library performs arithmetic only: there is no persistence, networking, I/O, or
 society-management domain behavior despite the historical layer names carried over from
-the source project. Its design follows a strict **single source of truth**: `compute`
-is defined exactly once, in `society_mgmt.core`, and every layer subpackage imports and
-re-exports that same function.
+the source project. Its design follows a strict **single source of truth** — the
+computation is defined exactly once, in `src/society_mgmt/core.py`, and each of the nine
+layer subpackages (`config`, `controllers`, `domain`, `middleware`, `models`,
+`repositories`, `routes`, `services`, `utils`) imports and re-exports that exact same
+`compute` object.
 
 ### Behavior
 
-`compute(x)` evaluates `6 * x` and adds `10` when that result is even. The parity
-conditional is retained (rather than hard-coded to `6 * x + 10`) so the behavior
-matches the original helpers for every numeric input:
+`compute(x)` returns `6 * x`, and adds `10` when that result is even. The parity
+conditional is retained (rather than hard-coded to `6 * x + 10`) so the behavior matches
+the original helpers for every numeric input:
 
-- For an integer `x`, `6 * x` is always even, so the `+ 10` is applied (for example,
-  `compute(3) == 28`).
-- For a non-integer `x` the result may be odd, in which case the `+ 10` is skipped
-  (for example, `compute(0.5) == 3.0`).
+- For an **integer** input, `6 * x` is always even, so `compute(x) == 6 * x + 10`
+  (for example, `compute(3) == 28`).
+- For a **non-integer** input the intermediate result may be odd, in which case
+  the `+ 10` is skipped (for example, `compute(0.5) == 3.0`).
 
 ## Requirements
 
-- **Python >= 3.12**
+- Python `>= 3.12`
 
-The library has **no runtime dependencies** — it uses only the Python standard library.
-The optional development tooling (`pytest`, `ruff`, `mypy`) is declared as a `dev` extra
-in `pyproject.toml`.
+The library has **no runtime dependencies**; `compute` uses only built-in
+numeric operators.
 
 ## Installation
 
-Create and activate a virtual environment.
-
-Linux / macOS:
+Create and activate a virtual environment, then install the package in editable
+mode.
 
 ```bash
+# Create a virtual environment
 python -m venv .venv
+
+# Activate it (POSIX: Linux / macOS)
 source .venv/bin/activate
-```
 
-Windows (PowerShell):
+# Activate it (Windows: PowerShell / cmd)
+.venv\Scripts\activate
 
-```bash
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-```
-
-Then install the package in editable mode. Add the `dev` extra to pull in the test and
-code-quality tooling:
-
-```bash
-# Runtime install (no third-party dependencies)
+# Install the package (runtime only)
 pip install -e .
 
-# Development install (adds pytest, ruff, mypy)
+# Or install with the development/test tooling (pytest, ruff, mypy)
 pip install -e ".[dev]"
 ```
 
 ## Usage
 
-Import `compute` from the top-level package and call it with a number:
+Import `compute` from the package root and call it with any number:
 
 ```python
 from society_mgmt import compute
 
-compute(0)  # -> 10
-compute(3)  # -> 28
-compute(5)  # -> 40
+compute(0)    # -> 10
+compute(3)    # -> 28
+compute(5)    # -> 40
+compute(0.5)  # -> 3.0  (non-integer: 6 * 0.5 == 3.0 is odd, so +10 is skipped)
 ```
 
-The same function is re-exported from every layer subpackage, so you can import it from
-whichever namespace reads best at the call site — they all resolve to the identical
-callable defined in `society_mgmt.core`:
+Because every layer subpackage re-exports the identical function object, you can
+import `compute` from any layer namespace and get exactly the same behavior:
 
 ```python
 from society_mgmt.services import compute
 
-compute(5)  # -> 40
-```
+compute(3)  # -> 28
 
-Non-integer inputs follow the parity rule described in
-[Behavior](#behavior) above:
-
-```python
-from society_mgmt import compute
-
-compute(0.5)  # -> 3.0  (6 * 0.5 == 3.0 is odd, so +10 is skipped)
+# The layer re-export IS the same object as the canonical core function:
+from society_mgmt import compute as core_compute
+from society_mgmt.services import compute as services_compute
+assert services_compute is core_compute  # True
 ```
 
 ## Project structure
 
-The package uses the modern `src/` layout:
+The package uses the modern `src/` layout. `core.py` holds the only
+implementation of the computation; each of the nine layer subpackages is a thin
+facade whose `__init__.py` does `from society_mgmt.core import compute` and
+declares `__all__ = ["compute"]`.
 
 ```text
-Society_mngt-13-Jul-2026/
-├── pyproject.toml                     # PEP 621 metadata, setuptools backend, tool config
-├── README.md                          # this file
-├── LICENSE                            # Apache-2.0 (+ license reconciliation note)
-├── .gitignore                         # Python build/test artifacts
+Society_mngt-13-Jul-2026/          (repository root)
+├── pyproject.toml                 (PEP 621 metadata; setuptools backend; tool config)
+├── README.md                      (this file)
+├── LICENSE                        (Apache-2.0 + license reconciliation note)
+├── .gitignore                     (Python build/test/venv ignores)
 ├── src/
-│   └── society_mgmt/
-│       ├── __init__.py                # package init; __version__; re-exports compute
-│       ├── core.py                    # single source of truth: compute(x)
-│       ├── config/__init__.py         # re-exports compute
-│       ├── controllers/__init__.py    # re-exports compute
-│       ├── domain/__init__.py         # re-exports compute
-│       ├── middleware/__init__.py     # re-exports compute
-│       ├── models/__init__.py         # re-exports compute
-│       ├── repositories/__init__.py   # re-exports compute
-│       ├── routes/__init__.py         # re-exports compute
-│       ├── services/__init__.py       # re-exports compute
-│       └── utils/__init__.py          # re-exports compute
+│   └── society_mgmt/              (importable package)
+│       ├── __init__.py            (package init; __version__; re-exports compute)
+│       ├── core.py                (single source of truth: compute(x))
+│       ├── config/__init__.py     (re-exports compute)
+│       ├── controllers/__init__.py (re-exports compute)
+│       ├── domain/__init__.py     (re-exports compute)
+│       ├── middleware/__init__.py (re-exports compute)
+│       ├── models/__init__.py     (re-exports compute)
+│       ├── repositories/__init__.py (re-exports compute)
+│       ├── routes/__init__.py     (re-exports compute)
+│       ├── services/__init__.py   (re-exports compute)
+│       └── utils/__init__.py      (re-exports compute)
 └── tests/
     ├── __init__.py
-    ├── conftest.py                    # shared parametrized fixtures
+    ├── conftest.py                (shared parametrized fixtures / canonical cases)
     ├── unit/
     │   ├── __init__.py
-    │   └── test_core.py               # asserts compute against closed-form values
+    │   └── test_core.py           (real assertions against compute)
     └── integration/
         ├── __init__.py
-        └── test_layers.py             # asserts every layer re-export is core.compute
+        └── test_layers.py         (asserts each layer re-export is core.compute)
 ```
 
-`core.compute` is the **only** implementation of the computation. The nine layer
-subpackages (`config`, `controllers`, `domain`, `middleware`, `models`,
-`repositories`, `routes`, `services`, `utils`) are thin namespaces that import and
-re-export it via `__all__ = ["compute"]`, so the original domain taxonomy is preserved
-without duplicating any logic.
+**Single-source-of-truth design.** No layer redefines the logic. `core.compute`
+is the sole implementation, and the layer packages simply re-export it. As a
+result, any future change to the computation is a one-line edit in `core.py`,
+and the layer taxonomy retains structural meaning without duplicating code.
 
 ## Running tests
 
-Install the development extra, then run the suite with `pytest`:
+Install the development extras (which include the test runner), then run the
+suite from the repository root:
 
 ```bash
 pip install -e ".[dev]"
 pytest
 ```
 
-The unit suite (`tests/unit/test_core.py`) asserts `compute` against closed-form
-expected values across both parity branches. The integration suite
-(`tests/integration/test_layers.py`) asserts that each layer re-export is the same
-callable as `society_mgmt.core.compute`.
+The unit suite (`tests/unit/test_core.py`) asserts `compute` against a canonical
+table of `(input, expected)` cases and covers both parity branches. The
+integration suite (`tests/integration/test_layers.py`) verifies the cross-layer
+contract — that each of the nine layer subpackages re-exports the exact same
+`compute` object as `society_mgmt.core`.
 
-Optional code-quality tooling is available through the same `dev` extra:
+Two optional developer tools are also configured in `pyproject.toml` and
+installed with the `dev` extras:
 
 ```bash
-# Lint check
+# Lint and format checks
 ruff check .
-
-# Format check
 ruff format --check .
 
-# Static type check (covers both the package and the test suite)
+# Static type checking
 mypy src tests
 ```
 
 ## License
 
-This project is licensed under the **Apache License 2.0** — see the [`LICENSE`](LICENSE)
-file for the full text. That file also carries a short reconciliation note: an earlier
-revision of the repository contained a nested, incomplete MIT license stub, which has
-been removed so that Apache-2.0 is the single, authoritative license for the project.
+This project is licensed under the **Apache License, Version 2.0**; see the
+[`LICENSE`](LICENSE) file for the full text. During the JavaScript-to-Python
+migration a conflicting, incomplete legacy MIT license stub (formerly nested in
+the removed source corpus) was found; it has been removed, and `LICENSE`
+includes a short reconciliation note documenting this for maintainer awareness.
+Apache-2.0 is the authoritative license for the project.
