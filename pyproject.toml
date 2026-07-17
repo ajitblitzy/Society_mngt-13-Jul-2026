@@ -1,32 +1,61 @@
+# pyproject.toml - canonical project configuration for the `society_mgmt` package.
+#
+# This is the single, authoritative manifest for the JavaScript-to-Python
+# migration of the former `society_mgmt_300k/` corpus (the source corpus shipped
+# no build or dependency manifest of any kind). The package uses the modern `src/`
+# layout and has ZERO runtime dependencies - its logic is pure standard-library
+# arithmetic consolidated into `src/society_mgmt/core.py::compute`. The optional
+# `dev` extra declares the build/test/quality toolchain. See README.md for
+# installation, usage, and package-structure documentation.
+
 [build-system]
+# setuptools >= 77 is required because [project] below uses PEP 639 license
+# metadata (the SPDX `license = "Apache-2.0"` string and the `license-files`
+# key); full PEP 639 support landed in setuptools 77.0. The build backend is the
+# standard PEP 517 setuptools backend.
 requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "society_mgmt"
-version = "0.1.0"
+version = "0.1.0"  # keep in sync with src/society_mgmt/__init__.py:__version__
 description = "Pure-arithmetic computation library (JavaScript-to-Python migration; single canonical compute function)."
 readme = "README.md"
 requires-python = ">=3.12"
+# PEP 639 license declaration: an SPDX expression plus the license file(s).
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Society_mgmt Maintainers" }]
+# A license classifier is intentionally omitted: PEP 639 disallows combining a
+# license classifier with the SPDX `license` expression above.
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Operating System :: OS Independent",
 ]
+# No runtime third-party dependencies by design: `compute` uses only built-in
+# numeric operators. This empty list is a deliberate, load-bearing declaration.
 dependencies = []
 
 [project.optional-dependencies]
+# Development-only toolchain, pinned to the exact versions verified against the
+# target runtime (Python 3.12). Install with: pip install -e ".[dev]"
+#   - pytest: real, asserting test suites (replaces the former fake fixtures)
+#   - ruff:   linter + formatter
+#   - mypy:   static type checker
 dev = ["pytest==9.1.1", "ruff==0.15.21", "mypy==2.3.0"]
 
 [tool.setuptools.packages.find]
+# `src/` layout: discovers the top-level `society_mgmt` package together with its
+# nine layer subpackages (config, controllers, domain, middleware, models,
+# repositories, routes, services, utils).
 where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+# Allow test discovery/import of the package straight from `src/` even without an
+# editable install (the editable install also works).
 pythonpath = ["src"]
 
 [tool.ruff]
