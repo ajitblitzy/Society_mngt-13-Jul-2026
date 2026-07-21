@@ -28,6 +28,22 @@ matches the original helpers for every numeric input:
 - For a non-integer `x` the result may be odd, in which case the `+ 10` is skipped
   (for example, `compute(0.5) == 3.0`).
 
+### Supported inputs
+
+`compute` accepts only the exact built-in numeric types `int`, `float`, and `bool`.
+Any other value — such as `str`, `None`, `complex`, `Decimal`, `Fraction`, a subclass
+of `int`/`float`, or any custom object — raises a `TypeError`. The input type is
+validated **before** any arithmetic is performed, so an unsupported value is rejected
+without invoking any operator method on it (for example `__mul__`/`__rmul__`). This
+keeps `compute` pure and safe: an unsupported input cannot trigger side effects, return
+an attacker-chosen value, amplify memory usage, or block the call.
+
+```python
+from society_mgmt import compute
+
+compute("3")  # raises TypeError (str is not a supported numeric type)
+```
+
 ## Requirements
 
 - **Python >= 3.12**
@@ -49,7 +65,7 @@ source .venv/bin/activate
 
 Windows (PowerShell):
 
-```bash
+```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```

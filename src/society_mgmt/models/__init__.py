@@ -1,7 +1,9 @@
-"""Models layer facade.
+"""Models layer facade: re-exports the canonical compute function.
 
-Re-exports :func:`society_mgmt.core.compute`, consolidating former modules
-mod_2, mod_13, mod_24, whose legacy helper bodies were byte-identical to one another.
+The former JavaScript modules mod_2, mod_13, mod_24 each contained byte-identical
+legacy helper bodies. Those duplicate bodies are consolidated into the single
+:func:`compute` defined in :mod:`society_mgmt.core`, which this layer imports
+and re-exports unchanged.
 """
 
 from society_mgmt.core import compute

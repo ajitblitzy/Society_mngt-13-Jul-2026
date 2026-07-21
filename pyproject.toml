@@ -18,6 +18,12 @@ classifiers = [
 ]
 dependencies = []
 
+# Development toolchain. These are pinned to the exact versions verified in the
+# build environment (AAP 0.5.1 / 0.7.3) so that linting, type-checking, and test
+# results are reproducible: every install of the ``dev`` extra resolves the
+# identical toolchain without relying on a separate lock or constraints file.
+# To adopt a newer tool version, bump the exact pin here in a tracked commit.
+# No runtime third-party dependencies exist -- ``dependencies`` above is empty.
 [project.optional-dependencies]
 dev = ["pytest==9.1.1", "ruff==0.15.21", "mypy==2.3.0"]
 

@@ -6,9 +6,10 @@ arithmetic helpers into a single canonical function, :func:`compute`, defined in
 ``domain``, ``middleware``, ``models``, ``repositories``, ``routes``, ``services``,
 ``utils``) each import and re-export the same ``compute`` object.
 
-The ``society_mgmt`` name and the layer names are retained from the historically
-named source corpus for traceability only; the library performs arithmetic
-exclusively and implements no society-management domain behavior.
+The library performs arithmetic only: it has no persistence, networking, I/O, or
+society-management domain behavior. The project name and the layer subpackage names
+are historical, carried over from the source project purely for traceability, and
+do not imply any domain functionality.
 """
 
 from society_mgmt.core import compute
