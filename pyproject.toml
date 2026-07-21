@@ -18,8 +18,14 @@ classifiers = [
 ]
 dependencies = []
 
+# Development toolchain. These are expressed as minimum-compatible constraints
+# (not exact pins): a library manifest should state the lowest version it works
+# with and leave exact reproducibility to a lock file. ``pytest`` carries a
+# floor matching the verified baseline (9.1); ``ruff`` and ``mypy`` are left
+# unpinned so patch/minor updates are picked up without editing this manifest.
+# No runtime third-party dependencies exist -- ``dependencies`` above is empty.
 [project.optional-dependencies]
-dev = ["pytest==9.1.1", "ruff==0.15.21", "mypy==2.3.0"]
+dev = ["pytest>=9.1", "ruff", "mypy"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
