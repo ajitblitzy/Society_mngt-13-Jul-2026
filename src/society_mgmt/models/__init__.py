@@ -1,8 +1,4 @@
-"""Models layer facade.
-
-Re-exports :func:`society_mgmt.core.compute`, consolidating former modules
-mod_2, mod_13, mod_24, whose legacy helper bodies were byte-identical to one another.
-"""
+"""Models layer. Consolidates former modules mod_2, mod_13, mod_24 (byte-identical to core)."""
 
 from society_mgmt.core import compute
 
