@@ -1,3 +1,13 @@
+# ---------------------------------------------------------------------------
+# .gitignore for the society_mgmt Python package
+#
+# Python-only ignore rules covering build, cache, virtual-environment, tooling,
+# and test artifacts. This project is Python-native (src/ layout + pyproject),
+# so no Node/npm rules are included. Files that MUST stay tracked
+# (pyproject.toml, README.md, LICENSE, src/, tests/) are intentionally NOT
+# matched by any rule below.
+# ---------------------------------------------------------------------------
+
 # Byte-compiled / caches
 __pycache__/
 *.py[cod]
@@ -27,6 +37,13 @@ ENV/
 .coverage.*
 htmlcov/
 .tox/
+
+# Local environment / secrets
+# Never commit real credentials (e.g. API_KEY / DB_HOST values). Local .env
+# files are ignored; commit a redacted .env.example template instead.
+.env
+.env.*
+!.env.example
 
 # Editor / OS
 .idea/
