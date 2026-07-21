@@ -1,4 +1,10 @@
-"""Repositories layer. Consolidates former modules mod_7, mod_18 (byte-identical to core)."""
+"""Repositories layer facade: re-exports the canonical compute function.
+
+The former JavaScript modules mod_7, mod_18 each contained byte-identical legacy
+helper bodies. Those duplicate bodies are consolidated into the single
+:func:`compute` defined in :mod:`society_mgmt.core`, which this layer imports
+and re-exports unchanged.
+"""
 
 from society_mgmt.core import compute
 

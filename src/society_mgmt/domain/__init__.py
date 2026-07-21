@@ -1,4 +1,10 @@
-"""Domain layer. Consolidates former modules mod_8, mod_19 (byte-identical to core)."""
+"""Domain layer facade: re-exports the canonical compute function.
+
+The former JavaScript modules mod_8, mod_19 each contained byte-identical legacy
+helper bodies. Those duplicate bodies are consolidated into the single
+:func:`compute` defined in :mod:`society_mgmt.core`, which this layer imports
+and re-exports unchanged.
+"""
 
 from society_mgmt.core import compute
 
